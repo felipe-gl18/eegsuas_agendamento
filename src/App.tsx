@@ -1,19 +1,30 @@
 import "./App.css";
-import { ApplicantForm } from "./components/ApplicantForm";
+
 import { PartnershipInfo } from "./components/PartnershipInfo";
-import { RequestDetails } from "./components/RequestDetails";
-import { RequestDocuments } from "./components/RequestDocuments";
-import { ResponsibilityTerm } from "./components/ResponsibilityTerm";
+import { PartnershipCarousel } from "./components/PartnershipCarousel";
+import { useState } from "react";
+
+export type ActionType = "increase" | "decrease";
 
 function App() {
+  const [totalCoherence, setTotalCoherence] = useState<number>(75);
+
+  const handleTotalCoherence = (action: ActionType, coherence: number) => {
+    if (action == "decrease") {
+      setTotalCoherence((prev) => prev - coherence);
+    } else {
+      setTotalCoherence((prev) => prev + coherence);
+    }
+  };
+
   return (
-    <section className="space-y-4 py-6">
+    <main className="space-y-6 py-6">
       <PartnershipInfo />
-      <ApplicantForm />
-      <RequestDetails />
-      <RequestDocuments />
-      <ResponsibilityTerm />
-    </section>
+      <PartnershipCarousel
+        totalCoherence={totalCoherence}
+        handleTotalCoherence={handleTotalCoherence}
+      />
+    </main>
   );
 }
 
