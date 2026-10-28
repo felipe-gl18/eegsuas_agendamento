@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { FileText, UserRound, Phone } from "lucide-react";
+import { Controller, useFormContext } from "react-hook-form";
 
 import {
   Card,
@@ -13,8 +13,24 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
 
+import type { PartnershipFormValues } from "../schemas/partnership.schema";
+
 export function ApplicantForm() {
-  const [whatsapp, setWhatsapp] = useState([false, false, false]);
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = useFormContext<PartnershipFormValues>();
+
+  const phones = [
+    {
+      title: "Telefone principal",
+      field: "phone1",
+      whatsapp: "phone1Whatsapp",
+    },
+    { title: "Segundo telefone", field: "phone2", whatsapp: "phone2Whatsapp" },
+    { title: "Terceiro telefone", field: "phone3", whatsapp: "phone3Whatsapp" },
+  ] as const;
 
   return (
     <Card className="mx-auto w-full max-w-4xl border-border/70 shadow-sm">
@@ -36,7 +52,6 @@ export function ApplicantForm() {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Identificação */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 border-b pb-2">
             <UserRound className="size-4 text-[#6c3eb8]" />
@@ -48,47 +63,66 @@ export function ApplicantForm() {
               <Label htmlFor="document">CPF/CNPJ *</Label>
               <Input
                 id="document"
-                name="document"
                 placeholder="000.000.000-00"
-                required
+                {...register("document")}
               />
+              {errors.document && (
+                <p className="text-sm text-destructive">
+                  {errors.document.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="name">Nome / Razão Social *</Label>
               <Input
                 id="name"
-                name="name"
                 placeholder="Nome completo ou razão social"
-                required
+                {...register("name")}
               />
+              {errors.name && (
+                <p className="text-sm text-destructive">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 placeholder="exemplo@email.com"
+                {...register("email")}
               />
+              {errors.email && (
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="area">Área de interesse (m²)</Label>
               <Input
                 id="area"
-                name="area"
                 type="number"
                 min="0"
                 step="any"
                 placeholder="Ex.: 250"
+                {...register("area", {
+                  setValueAs: (value) => (value === "" ? "" : Number(value)),
+                })}
               />
+              {errors.area && (
+                <p className="text-sm text-destructive">
+                  {errors.area.message}
+                </p>
+              )}
             </div>
           </div>
         </section>
 
-        {/* Telefones */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 border-b pb-2">
             <Phone className="size-4 text-[#6c3eb8]" />
@@ -96,40 +130,43 @@ export function ApplicantForm() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              "Telefone principal",
-              "Segundo telefone",
-              "Terceiro telefone",
-            ].map((title, index) => (
-              <div key={title} className="space-y-2">
-                <Label htmlFor={`phone-${index}`}>
-                  {title}
-                  {index === 0 ? " *" : ""}
+            {phones.map((phone) => (
+              <div key={phone.field} className="space-y-2">
+                <Label htmlFor={phone.field}>
+                  {phone.title}
+                  {phone.field === "phone1" ? " *" : ""}
                 </Label>
 
                 <Input
-                  id={`phone-${index}`}
-                  name={`phone${index + 1}`}
+                  id={phone.field}
                   type="tel"
                   placeholder="(00) 00000-0000"
-                  required={index === 0}
+                  {...register(phone.field)}
                 />
 
+                {errors[phone.field] && (
+                  <p className="text-sm text-destructive">
+                    {errors[phone.field]?.message}
+                  </p>
+                )}
+
                 <div className="flex items-center gap-2 pt-1">
-                  <Checkbox
-                    id={`whatsapp-${index}`}
-                    checked={whatsapp[index]}
-                    onCheckedChange={(checked) =>
-                      setWhatsapp((current) =>
-                        current.map((value, i) =>
-                          i === index ? checked === true : value,
-                        ),
-                      )
-                    }
-                    name={`phone${index + 1}Whatsapp`}
+                  <Controller
+                    name={phone.whatsapp}
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id={phone.whatsapp}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        name={field.name}
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                      />
+                    )}
                   />
                   <Label
-                    htmlFor={`whatsapp-${index}`}
+                    htmlFor={phone.whatsapp}
                     className="cursor-pointer text-sm font-normal text-muted-foreground"
                   >
                     Este número tem WhatsApp
@@ -140,7 +177,6 @@ export function ApplicantForm() {
           </div>
         </section>
 
-        {/* Atendimento */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 border-b pb-2">
             <FileText className="size-4 text-[#6c3eb8]" />
@@ -151,20 +187,30 @@ export function ApplicantForm() {
             <Label htmlFor="protocol">Protocolo de atendimento anterior</Label>
             <Input
               id="protocol"
-              name="protocol"
               placeholder="Informe o número do protocolo, se houver"
+              {...register("protocol")}
             />
+            {errors.protocol && (
+              <p className="text-sm text-destructive">
+                {errors.protocol.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="observation">Observação</Label>
             <Textarea
               id="observation"
-              name="observation"
               placeholder="Informações adicionais sobre a solicitação..."
               rows={3}
               className="resize-y"
+              {...register("observation")}
             />
+            {errors.observation && (
+              <p className="text-sm text-destructive">
+                {errors.observation.message}
+              </p>
+            )}
           </div>
         </section>
       </CardContent>

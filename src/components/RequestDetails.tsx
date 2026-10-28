@@ -2,10 +2,12 @@ import {
   ClipboardList,
   Building2,
   MapPin,
-  Users,
   CalendarDays,
   FileText,
 } from "lucide-react";
+
+import { Controller, useFormContext } from "react-hook-form";
+import type { PartnershipFormValues } from "../schemas/partnership.schema";
 
 import {
   Card,
@@ -26,6 +28,12 @@ import {
 } from "./ui/select";
 
 export function RequestDetails() {
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = useFormContext<PartnershipFormValues>();
+
   return (
     <Card className="mx-auto w-full max-w-4xl border-border/70 shadow-sm">
       <CardHeader className="pb-4">
@@ -46,7 +54,7 @@ export function RequestDetails() {
       </CardHeader>
 
       <CardContent className="space-y-5">
-        {/* Identificação da solicitação */}
+        {/* Informações da parceria */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 border-b pb-2">
             <FileText className="size-4 text-[#6c3eb8]" />
@@ -59,28 +67,56 @@ export function RequestDetails() {
                 Tipo de solicitação de parceria *
               </Label>
 
-              <Select name="requestType" required>
-                <SelectTrigger id="requestType" className="w-full">
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
+              <Controller
+                name="requestType"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    name={field.name}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger
+                      id="requestType"
+                      className="w-full"
+                      onBlur={field.onBlur}
+                      ref={field.ref}
+                    >
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
 
-                <SelectContent>
-                  <SelectItem value="estagio">Estágio</SelectItem>
-                  <SelectItem value="pesquisa">Pesquisa</SelectItem>
-                  <SelectItem value="extensao">Extensão</SelectItem>
-                  <SelectItem value="visita-tecnica">Visita técnica</SelectItem>
-                </SelectContent>
-              </Select>
+                    <SelectContent>
+                      <SelectItem value="estagio">Estágio</SelectItem>
+                      <SelectItem value="pesquisa">Pesquisa</SelectItem>
+                      <SelectItem value="extensao">Extensão</SelectItem>
+                      <SelectItem value="visita-tecnica">
+                        Visita técnica
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+
+              {errors.requestType && (
+                <p className="text-sm text-destructive">
+                  {errors.requestType.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="institution">Nome da instituição *</Label>
               <Input
                 id="institution"
-                name="institution"
                 placeholder="Nome da instituição de ensino"
-                required
+                {...register("institution")}
               />
+
+              {errors.institution && (
+                <p className="text-sm text-destructive">
+                  {errors.institution.message}
+                </p>
+              )}
             </div>
           </div>
         </section>
@@ -97,27 +133,39 @@ export function RequestDetails() {
               <Label htmlFor="locations">
                 Locais previstos para execução *
               </Label>
+
               <Input
                 id="locations"
-                name="locations"
                 placeholder="Informe os equipamentos ou locais previstos"
-                required
+                {...register("locations")}
               />
+
+              {errors.locations && (
+                <p className="text-sm text-destructive">
+                  {errors.locations.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="participants">
                 Quantidade de participantes envolvidos *
               </Label>
+
               <Input
                 id="participants"
-                name="participants"
                 type="number"
                 min="1"
                 step="1"
                 placeholder="Ex.: 10"
-                required
+                {...register("participants")}
               />
+
+              {errors.participants && (
+                <p className="text-sm text-destructive">
+                  {errors.participants.message}
+                </p>
+              )}
             </div>
           </div>
         </section>
@@ -132,12 +180,26 @@ export function RequestDetails() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="startDate">Data de início *</Label>
-              <Input id="startDate" name="startDate" type="date" required />
+
+              <Input id="startDate" type="date" {...register("startDate")} />
+
+              {errors.startDate && (
+                <p className="text-sm text-destructive">
+                  {errors.startDate.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="endDate">Data de término *</Label>
-              <Input id="endDate" name="endDate" type="date" required />
+
+              <Input id="endDate" type="date" {...register("endDate")} />
+
+              {errors.endDate && (
+                <p className="text-sm text-destructive">
+                  {errors.endDate.message}
+                </p>
+              )}
             </div>
           </div>
         </section>
@@ -153,14 +215,20 @@ export function RequestDetails() {
             <Label htmlFor="activityDescription">
               Descreva a atividade proposta *
             </Label>
+
             <Textarea
               id="activityDescription"
-              name="activityDescription"
               placeholder="Descreva os objetivos, as atividades previstas e como serão realizadas..."
               rows={4}
               className="resize-y"
-              required
+              {...register("activityDescription")}
             />
+
+            {errors.activityDescription && (
+              <p className="text-sm text-destructive">
+                {errors.activityDescription.message}
+              </p>
+            )}
           </div>
         </section>
       </CardContent>
