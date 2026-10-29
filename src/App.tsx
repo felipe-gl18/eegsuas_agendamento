@@ -7,7 +7,7 @@ import { useState } from "react";
 export type ActionType = "increase" | "decrease";
 
 function App() {
-  const [totalCoherence, setTotalCoherence] = useState<number>(75);
+  const [totalCoherence, setTotalCoherence] = useState<number>(15);
 
   const handleTotalCoherence = (action: ActionType, coherence: number) => {
     if (action == "decrease") {
