@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, type FieldPath } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -20,36 +20,60 @@ import { LowCoherenceDialog } from "./LowCoherenceDialog";
 
 import type { ActionType } from "../App";
 import { ResponsibilityTerm } from "./ResponsibilityTerm";
-import { partnershipSchema } from "../schemas/partnership.schema";
+import {
+  partnershipSchema,
+  type PartnershipFormValues,
+} from "../schemas/partnership.schema";
+import { applicantSchema } from "../schemas/applicant.schema";
+import { requestDetailsSchema } from "../schemas/request-details.schema";
+import { requestDocumentsSchema } from "../schemas/request-documents.schema";
+import { SubmissionSuccessDialog } from "./Submissionsuccessdialog";
 
 const MINIMUM_SCORE = 75;
 const SEDHAS_EMAIL = "sedhas@sobral.ce.gov.br";
 
-const steps = [
+type FieldName = FieldPath<PartnershipFormValues>;
+
+type StepComponentProps = {
+  handleTotalCoherence: (action: ActionType, coherence: number) => void;
+};
+
+type Step = {
+  title: string;
+  description: string;
+  component: ComponentType<StepComponentProps>;
+  fields?: FieldName[]; // opcional: etapas sem campos para validar
+};
+
+const steps: Step[] = [
   {
     title: "Coerência institucional",
     description: "Alinhamento institucional e critérios de avaliação.",
     component: InstitutionalCoherence,
-  },
-  {
-    title: "Documentação",
-    description: "Documentos necessários para a solicitação.",
-    component: RequestDocuments,
+    // sem fields: não há o que validar
   },
   {
     title: "Dados do solicitante",
     description: "Identificação do responsável pela solicitação.",
     component: ApplicantForm,
+    fields: Object.keys(applicantSchema.shape) as FieldName[],
   },
   {
     title: "Dados da solicitação",
     description: "Detalhes da atividade ou parceria.",
     component: RequestDetails,
+    fields: Object.keys(requestDetailsSchema.shape) as FieldName[],
+  },
+  {
+    title: "Documentação",
+    description: "Documentos necessários para a solicitação.",
+    component: RequestDocuments,
+    fields: Object.keys(requestDocumentsSchema.shape) as FieldName[],
   },
   {
     title: "Termo de Responsabilidade",
     description:
-      "Necessário para confirma o seu conhecimento e entendimento sobre os termos",
+      "Necessário para confirmar o seu conhecimento e entendimento sobre os termos",
     component: ResponsibilityTerm,
   },
 ];
@@ -70,7 +94,10 @@ export function PartnershipCarousel({
   });
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const [isValidating, setIsValidating] = useState(false);
   const [showLowCoherence, setShowLowCoherence] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState<string>();
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -85,14 +112,16 @@ export function PartnershipCarousel({
   } = form;
 
   const onSubmit = handleSubmit(
-    (data) => {
-      console.log("Dados válidos:", data);
+    async (data) => {
+      setSubmittedEmail(data.email);
+      setShowSuccess(true);
     },
     (errors) => {
-      for (const [field, error] of Object.entries(errors)) {
-        console.log("Campo:", field);
-        console.log("Erro:", error?.message);
-      }
+      const stepWithError = steps.findIndex((step) =>
+        step.fields?.some((field) => field in errors),
+      );
+
+      if (stepWithError !== -1) api?.scrollTo(stepWithError);
     },
   );
 
@@ -123,16 +152,28 @@ export function PartnershipCarousel({
     });
   }
 
-  function handleNextStep() {
+  async function handleNextStep() {
     // Validate coherence before leaving the first step.
     if (current === 0 && totalCoherence < MINIMUM_SCORE) {
       setShowLowCoherence(true);
       return;
     }
 
+    // Validate the fields of the current step (steps without `fields` are skipped).
+    const fields = steps[current].fields;
+
+    if (fields) {
+      setIsValidating(true);
+      try {
+        const isStepValid = await trigger(fields, { shouldFocus: true });
+        if (!isStepValid) return; // stays on the step and shows the errors
+      } finally {
+        setIsValidating(false);
+      }
+    }
+
     api?.scrollNext();
   }
-
   const isFirstStep = current === 0;
   const isLastStep = current === steps.length - 1;
   const CurrentStep = steps[current].component;
@@ -194,6 +235,7 @@ export function PartnershipCarousel({
             opts={{
               align: "start",
               loop: false,
+              watchDrag: false,
             }}
             className="w-full"
           >
@@ -246,6 +288,7 @@ export function PartnershipCarousel({
             ) : (
               <Button
                 type="button"
+                disabled={isValidating}
                 onClick={handleNextStep}
                 className="bg-[#6c3eb8] text-white hover:bg-[#583096]"
               >
@@ -261,6 +304,19 @@ export function PartnershipCarousel({
             onOpenChange={setShowLowCoherence}
             score={totalCoherence}
             contactEmail={SEDHAS_EMAIL}
+          />
+
+          {/* Success diolog */}
+          <SubmissionSuccessDialog
+            open={showSuccess}
+            email={submittedEmail}
+            onOpenChange={(open) => {
+              setShowSuccess(open);
+              if (!open) {
+                form.reset(); // limpa o formulário
+                api?.scrollTo(0); // volta para a primeira etapa
+              }
+            }}
           />
         </div>
       </form>
