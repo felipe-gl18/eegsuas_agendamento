@@ -1,5 +1,12 @@
-import { FileUp, Files, FileText, Upload } from "lucide-react";
-import { useFormContext } from "react-hook-form";
+import {
+  CheckCircle2,
+  FileText,
+  FileUp,
+  Files,
+  Trash2,
+  Upload,
+} from "lucide-react";
+import { Controller, useFormContext } from "react-hook-form";
 
 import type { PartnershipFormValues } from "../schemas/partnership.schema";
 
@@ -12,7 +19,6 @@ import {
 } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { useEffect } from "react";
 
 const documents = [
   {
@@ -42,21 +48,17 @@ const documents = [
   },
 ] as const;
 
+function formatFileSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export function RequestDocuments() {
   const {
+    control,
     register,
-    getValues,
-    setValue,
-    watch,
     formState: { errors },
   } = useFormContext<PartnershipFormValues>();
-
-  const fileFields = documents.map((document) => watch(document.fileField));
-
-  useEffect(() => {
-    const documentArray = documents.map((document) => document.fileField);
-    documentArray.map((document) => console.log(getValues(document)));
-  }, [getValues]);
 
   return (
     <Card className="mx-auto w-full max-w-4xl gap-0 border-border/70 py-0 shadow-sm">
@@ -79,115 +81,143 @@ export function RequestDocuments() {
 
       <CardContent className="p-5 pt-2 sm:p-6 sm:pt-3">
         <div className="space-y-3">
-          {documents.map((document) => {
+          {documents.map((document, index) => {
             const fileError = errors[document.fileField];
             const pagesError = errors[document.pagesField];
+            const fileInputId = `file-${document.id}`;
+            const pagesInputId = `pages-${document.id}`;
 
             return (
-              <div
+              <section
                 key={document.id}
-                className="grid gap-4 rounded-xl border border-border/70 p-4 sm:grid-cols-[minmax(0,1fr)_130px] sm:items-center"
+                aria-labelledby={`title-${document.id}`}
+                className="space-y-4 rounded-xl"
               >
-                <div className="flex min-w-0 items-start gap-3">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#f3edfc] text-[#6c3eb8]">
-                    <FileText className="size-4" />
+                <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_130px] sm:items-start">
+                  {/* Upload do arquivo */}
+                  <div className="space-y-2">
+                    <Controller
+                      control={control}
+                      name={document.fileField}
+                      render={({ field: { value, onChange, onBlur, ref } }) => {
+                        const file = value instanceof File ? value : undefined;
+
+                        return (
+                          <>
+                            <div className="flex items-stretch gap-2">
+                              <label
+                                htmlFor={fileInputId}
+                                className={`flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                                  file
+                                    ? "border-solid border-[#6c3eb8]/40 bg-[#f3edfc]/50"
+                                    : "border-dashed border-border hover:border-[#6c3eb8] hover:bg-[#f3edfc]/50"
+                                }`}
+                              >
+                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#ede5fa] text-[#6c3eb8]">
+                                  {file ? (
+                                    <CheckCircle2 className="size-4" />
+                                  ) : (
+                                    <Upload className="size-4" />
+                                  )}
+                                </div>
+
+                                <div className="min-w-0 flex-1">
+                                  {file ? (
+                                    <>
+                                      <p className="truncate text-sm font-medium">
+                                        {file.name}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground">
+                                        {formatFileSize(file.size)} · Clique
+                                        para trocar o arquivo
+                                      </p>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <p className="text-sm font-medium">
+                                        Selecionar arquivo
+                                      </p>
+                                      <p className="truncate text-xs text-muted-foreground">
+                                        para: {document.title}
+                                      </p>
+                                    </>
+                                  )}
+                                </div>
+
+                                <FileUp className="size-4 shrink-0 text-muted-foreground" />
+                              </label>
+
+                              {file && (
+                                <button
+                                  type="button"
+                                  onClick={() => onChange(undefined)}
+                                  aria-label={`Remover arquivo de ${document.title}`}
+                                  className="flex shrink-0 items-center justify-center rounded-lg border border-border px-3 text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="size-4" />
+                                </button>
+                              )}
+                            </div>
+
+                            <Input
+                              id={fileInputId}
+                              type="file"
+                              accept=".pdf,.doc,.docx"
+                              className="sr-only"
+                              ref={ref}
+                              onBlur={onBlur}
+                              aria-label={`Arquivo: ${document.title}`}
+                              aria-invalid={!!fileError}
+                              onChange={(event) => {
+                                const selected = event.target.files?.[0];
+                                onChange(selected); // guarda o File direto no form
+                                // limpa o input para permitir escolher o mesmo arquivo de novo
+                                event.target.value = "";
+                              }}
+                            />
+                          </>
+                        );
+                      }}
+                    />
+
+                    {fileError && (
+                      <p className="text-sm text-destructive">
+                        {fileError.message?.toString()}
+                      </p>
+                    )}
                   </div>
 
-                  <div className="min-w-0 space-y-1">
+                  {/* Quantidade de folhas */}
+                  <div className="space-y-2">
                     <Label
-                      htmlFor={`file-${document.id}`}
-                      className="text-sm font-medium leading-relaxed"
+                      htmlFor={pagesInputId}
+                      className="text-xs text-muted-foreground"
                     >
-                      {document.title}
-                      <span className="text-destructive"> *</span>
+                      Quantidade de folhas *
                     </Label>
 
-                    <p className="text-xs text-muted-foreground">
-                      PDF ou documento digitalizado
-                    </p>
+                    <Input
+                      id={pagesInputId}
+                      type="number"
+                      min="1"
+                      step="1"
+                      placeholder="Ex.: 5"
+                      aria-label={`Quantidade de folhas de ${document.title}`}
+                      aria-invalid={!!pagesError}
+                      {...register(document.pagesField, {
+                        setValueAs: (value) =>
+                          value === "" ? "" : String(value),
+                      })}
+                    />
+
+                    {pagesError && (
+                      <p className="text-xs text-destructive">
+                        {pagesError.message?.toString()}
+                      </p>
+                    )}
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor={`pages-${document.id}`}
-                    className="text-xs text-muted-foreground"
-                  >
-                    Quantidade de folhas *
-                  </Label>
-
-                  <Input
-                    id={`pages-${document.id}`}
-                    type="number"
-                    min="1"
-                    step="1"
-                    placeholder="Ex.: 5"
-                    {...register(document.pagesField, {
-                      setValueAs: (value) =>
-                        value === "" ? "" : String(value),
-                    })}
-                  />
-
-                  {pagesError && (
-                    <p className="text-sm text-destructive">
-                      {pagesError.message?.toString()}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2 sm:col-span-2">
-                  <Label
-                    htmlFor={`file-${document.id}`}
-                    className="text-xs text-muted-foreground"
-                  >
-                    Arquivo *
-                  </Label>
-
-                  <label
-                    htmlFor={`file-${document.id}`}
-                    className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-border p-3 transition-colors hover:border-[#6c3eb8] hover:bg-[#f3edfc]/50"
-                  >
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#ede5fa] text-[#6c3eb8]">
-                      <Upload className="size-4" />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium">
-                        {getValues(document.fileField)?.name ??
-                          "Selecionar arquivo"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Clique para procurar no dispositivo
-                      </p>
-                    </div>
-
-                    <FileUp className="size-4 shrink-0 text-muted-foreground" />
-                  </label>
-
-                  <Input
-                    id={`file-${document.id}`}
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    className="sr-only"
-                    {...register(document.fileField, {
-                      onChange: (event) => {
-                        const file = event.target.files?.[0];
-                        console.log(file, typeof file);
-                        setValue(document.fileField, file as never, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        });
-                      },
-                    })}
-                  />
-
-                  {fileError && (
-                    <p className="text-sm text-destructive">
-                      {fileError.message?.toString()}
-                    </p>
-                  )}
-                </div>
-              </div>
+              </section>
             );
           })}
         </div>
