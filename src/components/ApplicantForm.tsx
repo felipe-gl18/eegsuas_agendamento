@@ -14,6 +14,7 @@ import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
 
 import type { PartnershipFormValues } from "../schemas/partnership.schema";
+import { CpfCnpjField } from "./CpfcnpjField";
 
 export function ApplicantForm() {
   const {
@@ -59,19 +60,7 @@ export function ApplicantForm() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="document">CPF/CNPJ *</Label>
-              <Input
-                id="document"
-                placeholder="000.000.000-00"
-                {...register("document")}
-              />
-              {errors.document && (
-                <p className="text-sm text-destructive">
-                  {errors.document.message}
-                </p>
-              )}
-            </div>
+            <CpfCnpjField name="document" label="CPF/CNPJ *" />
 
             <div className="space-y-2">
               <Label htmlFor="name">Nome / Razão Social *</Label>
