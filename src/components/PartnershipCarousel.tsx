@@ -30,7 +30,7 @@ import { requestDocumentsSchema } from "../schemas/request-documents.schema";
 import { SubmissionSuccessDialog } from "./Submissionsuccessdialog";
 
 const MINIMUM_SCORE = 75;
-const SEDHAS_EMAIL = "sedhas@sobral.ce.gov.br";
+const SEDHAS_EMAIL = "egsuas@sobral.ce.gov.br";
 
 type FieldName = FieldPath<PartnershipFormValues>;
 
@@ -113,15 +113,81 @@ export function PartnershipCarousel({
 
   const onSubmit = handleSubmit(
     async (data) => {
-      setSubmittedEmail(data.email);
-      setShowSuccess(true);
+      try {
+        const {
+          "file_presentation-letter": presentationLetter,
+          "file_commitment-term": commitmentTerm,
+          "file_student-list": studentList,
+          "file_work-plan": workPlan,
+          ...formData
+        } = data;
+
+        const body = new FormData();
+
+        // Dados do formulário
+        body.append("data", JSON.stringify(formData));
+
+        // Documentos
+        const documents = [
+          presentationLetter,
+          commitmentTerm,
+          studentList,
+          workPlan,
+        ];
+
+        documents.forEach((document, index) => {
+          if (document instanceof File) {
+            body.append(`document${index + 1}`, document);
+          }
+        });
+
+        const response = await fetch("http://localhost:3000/uploads", {
+          method: "POST",
+          body,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          const detalhes = Array.isArray(result.documentos)
+            ? result.documentos
+                .map(
+                  (d: { nome?: string; campo: string; motivos: string[] }) =>
+                    `• ${d.nome ?? d.campo}:\n   - ${d.motivos.join("\n   - ")}`,
+                )
+                .join("\n\n")
+            : "";
+
+          throw new Error(
+            [result.message || "Falha ao enviar os documentos.", detalhes]
+              .filter(Boolean)
+              .join("\n\n"),
+          );
+        }
+
+        console.log("Upload successful:", result);
+
+        setSubmittedEmail(data.email);
+        setShowSuccess(true);
+      } catch (error) {
+        console.error("Submission error:", error);
+
+        alert(
+          error instanceof Error
+            ? error.message
+            : "Ocorreu um erro inesperado.",
+        );
+      }
     },
+
     (errors) => {
       const stepWithError = steps.findIndex((step) =>
         step.fields?.some((field) => field in errors),
       );
 
-      if (stepWithError !== -1) api?.scrollTo(stepWithError);
+      if (stepWithError !== -1) {
+        api?.scrollTo(stepWithError);
+      }
     },
   );
 

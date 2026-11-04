@@ -10,6 +10,7 @@ import {
 import { Checkbox } from "./ui/checkbox";
 import { useState } from "react";
 import type { ActionType } from "../App";
+import type { PublicPolicy } from "./InstitutionalCoherence";
 
 const criteria = [
   {
@@ -31,21 +32,17 @@ const criteria = [
 ];
 
 export function PublicPolicyCriteria({
+  policy,
+  handlePublicPolicy,
   handleTotalCoherence,
 }: {
+  policy: PublicPolicy;
+  handlePublicPolicy: (value: PublicPolicy) => void;
   handleTotalCoherence: (action: ActionType, coherence: number) => void;
 }) {
   const [checkedCriteria, setCheckedCriteria] = useState<
     Record<string, boolean>
   >({});
-  const [policy, setPolicy] = useState("");
-
-  const handlePolicy = (policy: string | undefined | null) => {
-    if (policy) {
-      setPolicy(policy);
-      handleTotalCoherence("increase", 5);
-    }
-  };
 
   function toggleCriterion(id: string, checked: boolean) {
     if (!checked) {
@@ -70,7 +67,10 @@ export function PublicPolicyCriteria({
 
       <div className="space-y-2">
         <Label htmlFor="publicPolicy">Política pública relacionada *</Label>
-        <Select value={policy} onValueChange={handlePolicy}>
+        <Select
+          value={policy}
+          onValueChange={(value) => value && handlePublicPolicy(value)}
+        >
           <SelectTrigger id="publicPolicy" className="w-full">
             <SelectValue placeholder="Selecione a política pública" />
           </SelectTrigger>

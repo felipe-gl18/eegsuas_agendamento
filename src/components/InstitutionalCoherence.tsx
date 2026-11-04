@@ -12,12 +12,25 @@ import { ModalityCoherence } from "./ModalityCoherence";
 import { PermanentEducationCoherence } from "./PermanentEducationCoherence";
 import { ManagementImpactCoherence } from "./ManagementImpact";
 import type { ActionType } from "../App";
+import { useState } from "react";
+
+export type PublicPolicy =
+  | "assistencia-social"
+  | "ireitos-humanos"
+  | "prevencao-violencia";
 
 export function InstitutionalCoherence({
   handleTotalCoherence,
 }: {
   handleTotalCoherence: (action: ActionType, coherence: number) => void;
 }) {
+  const [publicPolicty, setPublicPolicy] =
+    useState<PublicPolicy>("assistencia-social");
+
+  const handlePublicPolicy = (value: PublicPolicy) => {
+    setPublicPolicy(value);
+  };
+
   return (
     <Card className="mx-auto w-full max-w-4xl border-border/70 shadow-sm">
       <CardHeader className="pb-4">
@@ -39,8 +52,15 @@ export function InstitutionalCoherence({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <PublicPolicyCriteria handleTotalCoherence={handleTotalCoherence} />
-        <ServiceCoherence handleTotalCoherence={handleTotalCoherence} />
+        <PublicPolicyCriteria
+          policy={publicPolicty}
+          handlePublicPolicy={handlePublicPolicy}
+          handleTotalCoherence={handleTotalCoherence}
+        />
+        <ServiceCoherence
+          policy={publicPolicty}
+          handleTotalCoherence={handleTotalCoherence}
+        />
         <ModalityCoherence handleTotalCoherence={handleTotalCoherence} />
         <PermanentEducationCoherence
           handleTotalCoherence={handleTotalCoherence}
