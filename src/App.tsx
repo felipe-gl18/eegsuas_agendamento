@@ -7,7 +7,7 @@ import { useState } from "react";
 export type ActionType = "increase" | "decrease";
 
 function App() {
-  const [totalCoherence, setTotalCoherence] = useState<number>(15);
+  const [totalCoherence, setTotalCoherence] = useState<number>(0);
 
   const handleTotalCoherence = (action: ActionType, coherence: number) => {
     if (action == "decrease") {
@@ -19,6 +19,7 @@ function App() {
 
   return (
     <main className="space-y-6 py-6">
+      {totalCoherence}
       <PartnershipInfo />
       <PartnershipCarousel
         totalCoherence={totalCoherence}
