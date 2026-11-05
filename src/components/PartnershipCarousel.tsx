@@ -28,6 +28,9 @@ import { applicantSchema } from "../schemas/applicant.schema";
 import { requestDetailsSchema } from "../schemas/request-details.schema";
 import { requestDocumentsSchema } from "../schemas/request-documents.schema";
 import { SubmissionSuccessDialog } from "./Submissionsuccessdialog";
+import { toast } from "sonner";
+import type { DocumentReturn } from "./DocumentsList";
+import { showError, DocumentsList } from "./DocumentsList";
 
 const MINIMUM_SCORE = 75;
 const SEDHAS_EMAIL = "egsuas@sobral.ce.gov.br";
@@ -123,58 +126,54 @@ export function PartnershipCarousel({
         } = data;
 
         const body = new FormData();
-
-        // Dados do formulário
         body.append("data", JSON.stringify(formData));
 
-        // Documentos
-        const documents = [
-          presentationLetter,
-          commitmentTerm,
-          studentList,
-          workPlan,
-        ];
-
-        documents.forEach((document, index) => {
-          if (document instanceof File) {
-            body.append(`document${index + 1}`, document);
-          }
-        });
+        [presentationLetter, commitmentTerm, studentList, workPlan].forEach(
+          (document, index) => {
+            if (document instanceof File) {
+              body.append(`document${index + 1}`, document);
+            }
+          },
+        );
 
         const response = await fetch("http://localhost:3000/uploads", {
           method: "POST",
           body,
         });
 
-        const result = await response.json();
+        // se o servidor devolver algo que não é JSON (ex.: erro 500 em HTML), result fica null
+        const result = await response.json().catch(() => null);
 
         if (!response.ok) {
-          const detalhes = Array.isArray(result.documentos)
-            ? result.documentos
-                .map(
-                  (d: { nome?: string; campo: string; motivos: string[] }) =>
-                    `• ${d.nome ?? d.campo}:\n   - ${d.motivos.join("\n   - ")}`,
-                )
-                .join("\n\n")
-            : "";
-
-          throw new Error(
-            [result.message || "Falha ao enviar os documentos.", detalhes]
-              .filter(Boolean)
-              .join("\n\n"),
+          showError(
+            result?.message || "Falha ao enviar os documentos.",
+            Array.isArray(result?.documents) ? result.documents : [],
           );
+          return;
         }
 
-        console.log("Upload successful:", result);
+        // documentos que subiram, mas precisam de conferência manual
+        const emRevisao: DocumentReturn[] = (result?.files ?? []).filter(
+          (f: DocumentReturn) => f.status === "revisao",
+        );
+        if (emRevisao.length > 0) {
+          toast.warning(
+            "Documentos enviados, mas serão conferidos manualmente.",
+            {
+              duration: 10000,
+              description: <DocumentsList documents={emRevisao} />,
+            },
+          );
+        }
 
         setSubmittedEmail(data.email);
         setShowSuccess(true);
       } catch (error) {
         console.error("Submission error:", error);
-
-        alert(
-          error instanceof Error
-            ? error.message
+        // fetch lança TypeError quando o servidor está fora do ar / sem rede
+        toast.error(
+          error instanceof TypeError
+            ? "Não foi possível conectar ao servidor. Tente novamente em instantes."
             : "Ocorreu um erro inesperado.",
         );
       }
@@ -184,7 +183,6 @@ export function PartnershipCarousel({
       const stepWithError = steps.findIndex((step) =>
         step.fields?.some((field) => field in errors),
       );
-
       if (stepWithError !== -1) {
         api?.scrollTo(stepWithError);
       }
