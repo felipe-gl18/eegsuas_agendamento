@@ -1,11 +1,4 @@
-import {
-  CheckCircle2,
-  FileText,
-  FileUp,
-  Files,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { CheckCircle2, FileUp, Files, Trash2, Upload } from "lucide-react";
 import { Controller, useFormContext } from "react-hook-form";
 
 import type { PartnershipFormValues } from "../schemas/partnership.schema";
@@ -81,7 +74,7 @@ export function RequestDocuments() {
 
       <CardContent className="p-5 pt-2 sm:p-6 sm:pt-3">
         <div className="space-y-3">
-          {documents.map((document, index) => {
+          {documents.map((document, _) => {
             const fileError = errors[document.fileField];
             const pagesError = errors[document.pagesField];
             const fileInputId = `file-${document.id}`;

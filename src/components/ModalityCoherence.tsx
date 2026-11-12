@@ -8,8 +8,8 @@ import {
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { useState } from "react";
-import type { ActionType } from "../App";
 import { Checkbox } from "./ui/checkbox";
+import type { ActionType } from "../pages/solicitation/Solicitation";
 
 type Modality = "estagio" | "extensao" | "pesquisa" | "visita_tecnica";
 

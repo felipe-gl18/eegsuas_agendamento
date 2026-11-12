@@ -8,8 +8,8 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Label } from "./ui/label";
-import type { ActionType } from "../App";
 import type { PublicPolicy } from "./InstitutionalCoherence";
+import type { ActionType } from "../pages/solicitation/Solicitation";
 
 type Organization = {
   name: string;

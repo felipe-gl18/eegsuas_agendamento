@@ -2,7 +2,7 @@ import { ChartNoAxesCombined } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
-import type { ActionType } from "../App";
+import type { ActionType } from "../pages/solicitation/Solicitation";
 
 const criteria = [
   { id: "planning", label: "Planejamento" },
@@ -33,11 +33,11 @@ export function ManagementImpactCoherence({
   handleTotalCoherence: (action: ActionType, coherence: number) => void;
 }) {
   const [selectedManagement, setSelectedManagement] = useState<string[]>([]);
-  const managementScore = calculateScore(selectedManagement.length);
+  //const managementScore = calculateScore(selectedManagement.length);
 
-  function calculateScore(selectedCount: number): number {
-    return Math.min(selectedCount, 3) * 5;
-  }
+  //function calculateScore(selectedCount: number): number {
+  //  return Math.min(selectedCount, 3) * 5;
+  //}
 
   function toggleSelection(
     id: string,

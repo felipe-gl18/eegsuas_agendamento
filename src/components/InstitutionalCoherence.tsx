@@ -11,8 +11,8 @@ import { ServiceCoherence } from "./ServiceCoherence";
 import { ModalityCoherence } from "./ModalityCoherence";
 import { PermanentEducationCoherence } from "./PermanentEducationCoherence";
 import { ManagementImpactCoherence } from "./ManagementImpact";
-import type { ActionType } from "../App";
 import { useState } from "react";
+import type { ActionType } from "../pages/solicitation/Solicitation";
 
 export type PublicPolicy =
   | "assistencia-social"

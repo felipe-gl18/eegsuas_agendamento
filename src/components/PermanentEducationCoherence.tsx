@@ -2,7 +2,7 @@ import { BookOpen } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { useState } from "react";
-import type { ActionType } from "../App";
+import type { ActionType } from "../pages/solicitation/Solicitation";
 
 const criteria = [
   { id: "technicalReport", label: "Relatório técnico" },

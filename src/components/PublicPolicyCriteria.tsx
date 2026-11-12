@@ -9,8 +9,8 @@ import {
 } from "./ui/select";
 import { Checkbox } from "./ui/checkbox";
 import { useState } from "react";
-import type { ActionType } from "../App";
 import type { PublicPolicy } from "./InstitutionalCoherence";
+import type { ActionType } from "../pages/solicitation/Solicitation";
 
 const criteria = [
   {

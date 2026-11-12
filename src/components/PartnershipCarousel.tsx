@@ -18,7 +18,6 @@ import { RequestDocuments } from "./RequestDocuments";
 import { InstitutionalCoherence } from "./InstitutionalCoherence";
 import { LowCoherenceDialog } from "./LowCoherenceDialog";
 
-import type { ActionType } from "../App";
 import { ResponsibilityTerm } from "./ResponsibilityTerm";
 import {
   partnershipSchema,
@@ -31,6 +30,7 @@ import { SubmissionSuccessDialog } from "./Submissionsuccessdialog";
 import { toast } from "sonner";
 import type { DocumentReturn } from "./DocumentsList";
 import { showError, DocumentsList } from "./DocumentsList";
+import type { ActionType } from "../pages/solicitation/Solicitation";
 
 const MINIMUM_SCORE = 75;
 const SEDHAS_EMAIL = "egsuas@sobral.ce.gov.br";
@@ -111,7 +111,7 @@ export function PartnershipCarousel({
   const {
     handleSubmit,
     trigger,
-    formState: { errors },
+    formState: {},
   } = form;
 
   const onSubmit = handleSubmit(
@@ -240,7 +240,7 @@ export function PartnershipCarousel({
   }
   const isFirstStep = current === 0;
   const isLastStep = current === steps.length - 1;
-  const CurrentStep = steps[current].component;
+  //const CurrentStep = steps[current].component;
 
   return (
     <FormProvider {...form}>
