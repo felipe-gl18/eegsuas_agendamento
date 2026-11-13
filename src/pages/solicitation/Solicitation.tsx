@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PartnershipInfo } from "../../components/PartnershipInfo";
-import { PartnershipCarousel } from "../../components/PartnershipCarousel";
 import { Toaster } from "../../components/ui/sonner";
+import PartnershipCarousel from "../../components/PartnershipCarousel";
 
 export type ActionType = "increase" | "decrease";
 
