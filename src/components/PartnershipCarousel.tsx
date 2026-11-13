@@ -81,7 +81,7 @@ const steps: Step[] = [
   },
 ];
 
-export function PartnershipCarousel({
+export default function PartnershipCarousel({
   handleTotalCoherence,
   totalCoherence,
 }: {
@@ -136,7 +136,7 @@ export function PartnershipCarousel({
           },
         );
 
-        const response = await fetch("http://localhost:3000/uploads", {
+        const response = await fetch("http://localhost:3333/uploads", {
           method: "POST",
           body,
         });
