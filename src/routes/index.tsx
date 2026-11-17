@@ -7,6 +7,9 @@ import Register from "../pages/auth/Register";
 import { ForgotPassword } from "../pages/auth/ForgotPassword";
 import { ProtectedRoute } from "./ProtectedRoute";
 import ResetPassword from "../pages/auth/ResetPassword";
+import DashboardLayout from "../layouts/DashboardLayout";
+import TrainingTracks from "../pages/training-tracks/TrainingTracks";
+import FormationDetails from "../pages/training-tracks/FormationDetails";
 
 export const router = createBrowserRouter([
   {
@@ -36,7 +39,19 @@ export const router = createBrowserRouter([
   },
   {
     element: <ProtectedRoute />,
-    children: [{ path: "/dashboard", element: <div>Dashboard</div> }],
+    children: [
+      {
+        element: <DashboardLayout />,
+        children: [
+          { path: "/dashboard", element: <div>Dashboard</div> },
+          { path: "/dashboard/training-tracks", element: <TrainingTracks /> },
+          {
+            path: "/dashboard/training-tracks/:id",
+            element: <FormationDetails />,
+          },
+        ],
+      },
+    ],
   },
   {
     path: "*",
