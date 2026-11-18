@@ -1,70 +1,69 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  Search,
-  GraduationCap,
-  Clock,
-  BookOpen,
-  Pencil,
-  Trash2,
-  Eye,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { GraduationCap, Clock, BookOpen, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { useFormations } from "../../contexts/formations/useFormations";
 
-import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { Skeleton } from "../../components/ui/skeleton";
+import { DataPagination } from "../../components/shared/DataPagination";
 
-import { useNavigate } from "react-router-dom";
+import UpdateTrainingTrack from "./UpdateTrainingTrack";
+import DeleteTrainingTrack from "./DeleteTrainingTrack";
+import { DataSearch } from "../../components/shared/DataSearch.tsx";
+
+const PAGE_SIZE = 9;
 
 export default function TrainingTracksList() {
   const navigate = useNavigate();
-  const { formations, isLoading, error, fetchFormations } = useFormations();
+
+  const { formations, meta, isLoading, error, fetchFormations } =
+    useFormations();
 
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
+  // Fetch formations whenever pagination or search changes.
   useEffect(() => {
-    fetchFormations().catch(() => {
-      // O erro já é tratado pelo contexto.
+    fetchFormations({
+      page,
+      limit: PAGE_SIZE,
+      search,
+    }).catch(() => {
+      // Error is already handled by the context.
     });
-  }, [fetchFormations]);
+  }, [fetchFormations, page, search]);
 
-  const filteredFormations = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    if (!term) return formations;
-
-    return formations.filter(
-      (formation) =>
-        formation.name.toLowerCase().includes(term) ||
-        formation.description.toLowerCase().includes(term),
-    );
-  }, [formations, search]);
+  const handleRetry = () => {
+    fetchFormations({
+      page,
+      limit: PAGE_SIZE,
+      search,
+    }).catch(() => {});
+  };
 
   return (
     <div className="space-y-5">
-      {/* Barra de pesquisa e quantidade */}
+      {/* Search and results count */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-sm">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-
-          <Input
-            placeholder="Pesquisar formação..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+        <DataSearch
+          value={search}
+          onChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          placeholder="Pesquisar formações..."
+        />
 
         <p className="text-sm text-muted-foreground">
-          {formations.length}{" "}
-          {formations.length === 1
+          {meta?.total ?? 0}{" "}
+          {(meta?.total ?? 0) === 1
             ? "formação cadastrada"
             : "formações cadastradas"}
         </p>
       </div>
 
-      {/* Carregamento */}
+      {/* Loading */}
       {isLoading && (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
@@ -78,22 +77,18 @@ export default function TrainingTracksList() {
         </div>
       )}
 
-      {/* Erro */}
+      {/* Error */}
       {!isLoading && error && (
         <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center">
           <p className="text-sm text-destructive">{error}</p>
 
-          <Button
-            variant="outline"
-            className="mt-3"
-            onClick={() => fetchFormations().catch(() => {})}
-          >
+          <Button variant="outline" className="mt-3" onClick={handleRetry}>
             Tentar novamente
           </Button>
         </div>
       )}
 
-      {/* Lista vazia */}
+      {/* Empty state */}
       {!isLoading && !error && formations.length === 0 && (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed px-6 py-14 text-center">
           <div className="mb-4 rounded-full bg-[#514949]/10 p-4">
@@ -101,38 +96,23 @@ export default function TrainingTracksList() {
           </div>
 
           <h3 className="font-semibold text-[#514949]">
-            Nenhuma formação cadastrada
+            {search.trim()
+              ? "Nenhuma formação encontrada"
+              : "Nenhuma formação cadastrada"}
           </h3>
 
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            Comece cadastrando uma formação para organizar os conteúdos e as
-            atividades.
+            {search.trim()
+              ? "Tente pesquisar utilizando outro termo."
+              : "Comece cadastrando uma formação para organizar os conteúdos e as atividades."}
           </p>
         </div>
       )}
 
-      {/* Nenhum resultado */}
-      {!isLoading &&
-        !error &&
-        formations.length > 0 &&
-        filteredFormations.length === 0 && (
-          <div className="rounded-xl border border-dashed p-10 text-center">
-            <Search className="mx-auto mb-3 size-8 text-muted-foreground" />
-
-            <p className="font-medium text-[#514949]">
-              Nenhuma formação encontrada
-            </p>
-
-            <p className="mt-1 text-sm text-muted-foreground">
-              Tente pesquisar utilizando outro termo.
-            </p>
-          </div>
-        )}
-
-      {/* Cards */}
-      {!isLoading && !error && filteredFormations.length > 0 && (
+      {/* Formation cards */}
+      {!isLoading && !error && formations.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {filteredFormations.map((formation) => (
+          {formations.map((formation) => (
             <div
               key={formation.id}
               className="group flex flex-col rounded-xl border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
@@ -163,7 +143,7 @@ export default function TrainingTracksList() {
 
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <BookOpen className="size-4" />
-                  <span>{formation.modules?.length ?? 0} módulos</span>
+                  <span>{formation._count.modules} módulos</span>
                 </div>
               </div>
 
@@ -172,32 +152,39 @@ export default function TrainingTracksList() {
                   variant="ghost"
                   size="icon"
                   title="Visualizar formação"
-                  onClick={() => navigate(`/dashboard/training-tracks/${formation.id}`)}
+                  onClick={() =>
+                    navigate(`/dashboard/training-tracks/${formation.id}`)
+                  }
                 >
                   <Eye className="size-4" />
                 </Button>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  title="Editar formação"
-                  disabled
-                >
-                  <Pencil className="size-4" />
-                </Button>
+                <UpdateTrainingTrack
+                  formation={{
+                    id: formation.id,
+                    name: formation.name,
+                    description: formation.description,
+                    workloadHours: formation.workloadHours,
+                  }}
+                />
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  title="Excluir formação"
-                  disabled
-                >
-                  <Trash2 className="size-4" />
-                </Button>
+                <DeleteTrainingTrack id={formation.id} name={formation.name} />
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {/* Pagination */}
+      {!isLoading && !error && meta && meta.totalPages > 1 && (
+        <DataPagination
+          currentPage={meta.page}
+          totalPages={meta.totalPages}
+          totalItems={meta.total}
+          pageSize={meta.limit}
+          onPageChange={setPage}
+          showSummary
+        />
       )}
     </div>
   );
