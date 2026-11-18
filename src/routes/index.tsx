@@ -9,7 +9,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import ResetPassword from "../pages/auth/ResetPassword";
 import DashboardLayout from "../layouts/DashboardLayout";
 import TrainingTracks from "../pages/training-tracks/TrainingTracks";
-import FormationDetails from "../pages/training-tracks/FormationDetails";
+import TrainingTrackDetails from "../pages/training-tracks/TrainingTrackDetails";
 
 export const router = createBrowserRouter([
   {
@@ -47,7 +47,7 @@ export const router = createBrowserRouter([
           { path: "/dashboard/training-tracks", element: <TrainingTracks /> },
           {
             path: "/dashboard/training-tracks/:id",
-            element: <FormationDetails />,
+            element: <TrainingTrackDetails />,
           },
         ],
       },
