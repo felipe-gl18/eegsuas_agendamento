@@ -8,8 +8,10 @@ import AddTrainingModule from "./AddTrainingModule";
 
 import { Button } from "../../components/ui/button";
 import { Skeleton } from "../../components/ui/skeleton";
+import UpdateTrainingModule from "./UpdateTrainingModule";
+import DeleteTrainingModule from "./DeleteTrainingModule";
 
-export default function FormationDetails() {
+export default function TrainingTrackDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -76,7 +78,7 @@ export default function FormationDetails() {
         <Button
           variant="outline"
           size="icon"
-          onClick={() => navigate("/formations")}
+          onClick={() => navigate("/dashboard/training-tracks")}
           title="Voltar para formações"
         >
           <ArrowLeft className="size-4" />
@@ -191,6 +193,16 @@ export default function FormationDetails() {
                       Sem descrição.
                     </p>
                   )}
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <UpdateTrainingModule
+                    formationId={currentFormation.id}
+                    module={module}
+                  />
+                  <DeleteTrainingModule
+                    formationId={currentFormation.id}
+                    module={module}
+                  />
                 </div>
               </div>
             ))}

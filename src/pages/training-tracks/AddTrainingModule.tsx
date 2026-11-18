@@ -3,7 +3,7 @@ import { PlusIcon } from "lucide-react";
 
 import { useFormations } from "../../contexts/formations/useFormations";
 
-import ModuleForm from "./ModuleForm";
+import ModuleForm from "./TrainingModuleForm";
 
 import { Button } from "../../components/ui/button";
 import {
@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "../../components/ui/dialog";
 
-import type { ModuleFormData } from "../../schemas/module.schema";
+import type { ModuleFormData } from "../../schemas/training-module.schema";
 
 interface AddTrainingModuleProps {
   formationId: string;
@@ -49,7 +49,7 @@ export default function AddTrainingModule({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
+      <DialogTrigger>
         <Button className="bg-[#3B82F6] text-white hover:bg-[#2563EB]">
           <PlusIcon className="mr-2 size-4" />
           Novo módulo

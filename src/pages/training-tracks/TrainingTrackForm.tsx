@@ -3,9 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 
 import {
-  moduleSchema,
-  type ModuleFormData,
-} from "../../schemas/module.schema";
+  formationSchema,
+  type FormationFormData,
+} from "../../schemas/formation.schema";
 
 import {
   Field,
@@ -19,33 +19,33 @@ import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import { Button } from "../../components/ui/button";
 
-interface ModuleFormProps {
-  defaultValues?: ModuleFormData;
+export interface FormationFormProps {
+  defaultValues?: FormationFormData;
   isSubmitting: boolean;
   error?: string | null;
   submitLabel?: string;
-  onSubmit: (data: ModuleFormData) => Promise<void>;
+  onSubmit: (data: FormationFormData) => Promise<void>;
   onCancel: () => void;
 }
 
-export default function ModuleForm({
+export default function TrainingTrackForm({
   defaultValues,
   isSubmitting,
   error,
-  submitLabel = "Cadastrar módulo",
+  submitLabel = "Cadastrar formação",
   onSubmit,
   onCancel,
-}: ModuleFormProps) {
-  const form = useForm<ModuleFormData>({
-    resolver: zodResolver(moduleSchema),
+}: FormationFormProps) {
+  const form = useForm<FormationFormData>({
+    resolver: zodResolver(formationSchema),
     defaultValues: defaultValues ?? {
       name: "",
       description: "",
-      order: 1,
+      workloadHours: 1,
     },
   });
 
-  async function handleSubmit(data: ModuleFormData) {
+  async function handleSubmit(data: FormationFormData) {
     await onSubmit(data);
   }
 
@@ -69,20 +69,18 @@ export default function ModuleForm({
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="module-name">Nome do módulo</FieldLabel>
+              <FieldLabel htmlFor="formation-name">Nome da formação</FieldLabel>
 
               <Input
                 {...field}
-                id="module-name"
-                placeholder="Ex.: Introdução ao SUAS"
+                id="formation-name"
+                placeholder="Ex.: Capacitação em Gestão do SUAS"
                 maxLength={150}
                 aria-invalid={fieldState.invalid}
                 disabled={isSubmitting}
               />
 
-              {fieldState.invalid && (
-                <FieldError errors={[fieldState.error]} />
-              )}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
@@ -93,15 +91,12 @@ export default function ModuleForm({
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="module-description">
-                Descrição
-              </FieldLabel>
+              <FieldLabel htmlFor="formation-description">Descrição</FieldLabel>
 
               <Textarea
                 {...field}
-                value={field.value ?? ""}
-                id="module-description"
-                placeholder="Descreva os conteúdos abordados neste módulo..."
+                id="formation-description"
+                placeholder="Descreva os objetivos e conteúdos da formação..."
                 className="min-h-32 resize-y"
                 maxLength={2000}
                 aria-invalid={fieldState.invalid}
@@ -110,37 +105,35 @@ export default function ModuleForm({
 
               <div className="flex justify-end">
                 <span className="text-xs text-muted-foreground">
-                  {(field.value ?? "").length}/2000
+                  {field.value.length}/2000
                 </span>
               </div>
 
-              {fieldState.invalid && (
-                <FieldError errors={[fieldState.error]} />
-              )}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
 
-        {/* Ordem */}
+        {/* Carga horária */}
         <Controller
-          name="order"
+          name="workloadHours"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="module-order">
-                Ordem do módulo
+              <FieldLabel htmlFor="formation-workload">
+                Carga horária (horas)
               </FieldLabel>
 
               <Input
-                id="module-order"
+                id="formation-workload"
                 type="number"
                 min={1}
+                max={5000}
                 step={1}
-                placeholder="Ex.: 1"
+                placeholder="Ex.: 40"
                 value={field.value}
                 onChange={(event) => {
                   const value = event.target.value;
-
                   field.onChange(value === "" ? 0 : Number(value));
                 }}
                 onBlur={field.onBlur}
@@ -150,9 +143,7 @@ export default function ModuleForm({
                 disabled={isSubmitting}
               />
 
-              {fieldState.invalid && (
-                <FieldError errors={[fieldState.error]} />
-              )}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />

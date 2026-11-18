@@ -3,7 +3,7 @@ import { PlusIcon } from "lucide-react";
 
 import { useFormations } from "../../contexts/formations/useFormations";
 
-import FormationForm from "./FormationForm";
+import TrainingTrackForm from "./TrainingTrackForm";
 
 import { Button } from "../../components/ui/button";
 import {
@@ -41,7 +41,7 @@ export default function AddTrainingTrack() {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
+      <DialogTrigger>
         <Button className="bg-[#3B82F6] text-white hover:bg-[#2563EB]">
           <PlusIcon className="mr-2 size-4" />
           Nova formação
@@ -61,7 +61,7 @@ export default function AddTrainingTrack() {
         </DialogHeader>
 
         {open && (
-          <FormationForm
+          <TrainingTrackForm
             isSubmitting={isSubmitting}
             error={error}
             submitLabel="Cadastrar formação"
