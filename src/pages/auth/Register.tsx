@@ -68,7 +68,15 @@ function maskCpf(value: string) {
 }
 
 export default function Register({ onSuccess }: RegisterProps) {
-  const { register, isLoading, error } = useAuthentication();
+  const {
+    register,
+    isLoading,
+    error,
+    unities,
+    occupations,
+    isLoadingOptions,
+    fetchRegistrationOptions,
+  } = useAuthentication();
   const [showPassword, setShowPassword] = useState(false);
 
   const [universities, setUniversities] = useState<VerifiedUniversity[]>([]);
@@ -83,6 +91,8 @@ export default function Register({ onSuccess }: RegisterProps) {
       universityId: "",
       password: "",
       confirmPassword: "",
+      occupationId: "",
+      unityId: "",
     },
   });
 
@@ -90,7 +100,10 @@ export default function Register({ onSuccess }: RegisterProps) {
     const { confirmPassword: _confirmPassword, ...payload } = data;
 
     try {
-      await register(payload);
+      await register({
+        ...payload,
+        universityId: payload.universityId || null,
+      });
       onSuccess?.();
     } catch {
       // O contexto já expõe a mensagem de erro.
@@ -117,6 +130,12 @@ export default function Register({ onSuccess }: RegisterProps) {
       .catch(console.error)
       .finally(() => setIsLoadingUniversities(false));
   }, []);
+
+  useEffect(() => {
+    fetchRegistrationOptions().catch(() => {
+      // The provider already stores the error message.
+    });
+  }, [fetchRegistrationOptions]);
 
   return (
     <Card className="border-0 py-8 shadow-2xl shadow-black/30">
@@ -212,6 +231,95 @@ export default function Register({ onSuccess }: RegisterProps) {
               )}
             />
 
+            <div className="flex gap-4">
+              <Controller
+                name="unityId"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="register-unity">Unidade</FieldLabel>
+
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isLoading || isLoadingOptions}
+                    >
+                      <SelectTrigger id="register-unity">
+                        <SelectValue
+                          placeholder={
+                            isLoadingOptions
+                              ? "Carregando unidades..."
+                              : "Selecione sua unidade"
+                          }
+                        >
+                          {
+                            unities.find((unity) => unity.id === field.value)
+                              ?.name
+                          }
+                        </SelectValue>
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        {unities.map((unity) => (
+                          <SelectItem key={unity.id} value={unity.id}>
+                            {unity.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="occupationId"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="register-occupation">Cargo</FieldLabel>
+
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isLoading || isLoadingOptions}
+                    >
+                      <SelectTrigger id="register-occupation">
+                        <SelectValue
+                          placeholder={
+                            isLoadingOptions
+                              ? "Carregando ocupações..."
+                              : "Selecione sua ocupação"
+                          }
+                        >
+                          {
+                            occupations.find(
+                              (occupation) => occupation.id === field.value,
+                            )?.name
+                          }
+                        </SelectValue>
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        {occupations.map((occupation) => (
+                          <SelectItem key={occupation.id} value={occupation.id}>
+                            {occupation.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+
             <Controller
               name="universityId"
               control={form.control}
@@ -233,7 +341,13 @@ export default function Register({ onSuccess }: RegisterProps) {
                             ? "Carregando universidades..."
                             : "Selecione sua universidade"
                         }
-                      />
+                      >
+                        {
+                          universities.find(
+                            (university) => university.id === field.value,
+                          )?.name
+                        }
+                      </SelectValue>
                     </SelectTrigger>
 
                     <SelectContent>
