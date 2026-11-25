@@ -27,7 +27,15 @@ export const registerSchema = z
 
     confirmPassword: z.string().min(1, "Por favor, confirme sua senha."),
 
-    universityId: z.uuid().optional().nullable(),
+    unityId: z.uuid("Selecione sua unidade."),
+
+    occupationId: z.uuid("Selecione seu cargo."),
+
+    // optional: an empty string means "no university" and becomes null on submit
+    universityId: z
+      .union([z.uuid(), z.literal("")])
+      .optional()
+      .nullable(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "As senhas não coincidem.",
