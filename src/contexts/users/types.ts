@@ -40,11 +40,24 @@ export interface UserUniversity {
   status: UniversityStatus;
 }
 
+export interface UserUnity {
+  name: string;
+  acronym: string;
+}
+
+export interface UserOccupation {
+  name: string;
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   role: UserRole;
+  unity: UserUnity;
+  unityId: string;
+  occupation: UserOccupation;
+  occupationId: string;
   universityId: string | null;
   university: UserUniversity | null;
   createdAt: string;
