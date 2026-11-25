@@ -10,6 +10,10 @@ import ResetPassword from "../pages/auth/ResetPassword";
 import DashboardLayout from "../layouts/DashboardLayout";
 import TrainingTracks from "../pages/training-tracks/TrainingTracks";
 import TrainingTrackDetails from "../pages/training-tracks/TrainingTrackDetails";
+import Users from "../pages/users/Users";
+import UserDetails from "../pages/users/UserDetails";
+import Schedule from "../pages/schedule/Schedule";
+import Solicitations from "../pages/solicitations/Solicitations";
 
 export const router = createBrowserRouter([
   {
@@ -49,6 +53,16 @@ export const router = createBrowserRouter([
             path: "/dashboard/training-tracks/:id",
             element: <TrainingTrackDetails />,
           },
+          {
+            path: "/dashboard/users",
+            element: <Users />,
+          },
+          {
+            path: "/dashboard/users/:id",
+            element: <UserDetails />,
+          },
+          { path: "/dashboard/schedule", element: <Schedule /> },
+          { path: "/dashboard/solicitations", element: <Solicitations /> },
         ],
       },
     ],
