@@ -213,9 +213,13 @@ function DetailsPanel({
     fetchSolicitationById,
     decideSolicitation,
     setCurrentSolicitation,
+    getDocumentUrl,
   } = useSolicitations();
 
   const [note, setNote] = useState("");
+  const [openingDocumentId, setOpeningDocumentId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     setNote("");
@@ -236,6 +240,35 @@ function DetailsPanel({
 
   const solicitation: SolicitationDetails | null =
     currentSolicitation?.id === solicitationId ? currentSolicitation : null;
+
+  const handleOpenDocument = async (documentId: string) => {
+    // open the tab synchronously (inside the click) so the browser doesn't block it
+    const newTab = window.open("", "_blank");
+
+    if (!newTab) {
+      toast.error("Permita pop-ups neste site para visualizar o documento.");
+      return;
+    }
+
+    newTab.opener = null;
+    newTab.document.title = "Carregando documento...";
+
+    setOpeningDocumentId(documentId);
+
+    try {
+      const { url } = await getDocumentUrl(solicitationId, documentId);
+      newTab.location.href = url;
+    } catch (error) {
+      newTab.close();
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível abrir o documento.",
+      );
+    } finally {
+      setOpeningDocumentId(null);
+    }
+  };
 
   const handleDecision = async (decision: Decision) => {
     if (decision === "REJECTED" && !note.trim()) {
@@ -406,9 +439,27 @@ function DetailsPanel({
                           <ValidationBadge status={document.validationStatus} />
                         </div>
 
-                        <p className="mt-2 break-all text-xs text-muted-foreground">
-                          {document.fileName}
-                        </p>
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <p className="break-all text-xs text-muted-foreground">
+                            {document.fileName}
+                          </p>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="shrink-0"
+                            disabled={openingDocumentId === document.id}
+                            onClick={() => handleOpenDocument(document.id)}
+                          >
+                            {openingDocumentId === document.id ? (
+                              <RefreshCw className="mr-2 size-4 animate-spin" />
+                            ) : (
+                              <Eye className="mr-2 size-4" />
+                            )}
+                            Visualizar
+                          </Button>
+                        </div>
 
                         {document.reasons.length > 0 && (
                           <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
