@@ -46,6 +46,9 @@ interface EnrolledStudent {
     id: string;
     name: string;
     email: string;
+    occupation: { name: string };
+    unity: { name: string; acronym: string };
+    university: { name: string; acronym: string };
   };
   attendancePercentage: number;
   totalSessions: number;
@@ -321,6 +324,48 @@ export default function EnrolledStudents({ trackId }: EnrolledStudentsProps) {
         cell: ({ row }) => row.original.user.email,
       },
       {
+        id: "unity",
+        accessorFn: (row) =>
+          row.user.unity?.acronym ?? row.user.unity?.name ?? "",
+        header: ({ column }) => (
+          <SortableHeader
+            label="Unidade"
+            sorted={column.getIsSorted()}
+            onToggle={() =>
+              column.toggleSorting(column.getIsSorted() === "asc")
+            }
+          />
+        ),
+        cell: ({ row }) => {
+          const unity = row.original.user.unity;
+
+          if (!unity) return <span className="text-muted-foreground">—</span>;
+
+          return <span title={unity.name}>{unity.acronym ?? unity.name}</span>;
+        },
+      },
+      {
+        id: "occupation",
+        accessorFn: (row) => row.user.occupation?.name ?? "",
+        header: ({ column }) => (
+          <SortableHeader
+            label="Ocupação"
+            sorted={column.getIsSorted()}
+            onToggle={() =>
+              column.toggleSorting(column.getIsSorted() === "asc")
+            }
+          />
+        ),
+        cell: ({ row }) => {
+          const occupation = row.original.user.occupation;
+
+          if (!occupation)
+            return <span className="text-muted-foreground">—</span>;
+
+          return <span>{occupation.name}</span>;
+        },
+      },
+      {
         id: "createdAt",
         accessorFn: (row) => new Date(row.createdAt),
         header: ({ column }) => (
@@ -480,6 +525,8 @@ export default function EnrolledStudents({ trackId }: EnrolledStudentsProps) {
   const firstItem = filteredCount === 0 ? 0 : pageIndex * pageSize + 1;
 
   const lastItem = Math.min((pageIndex + 1) * pageSize, filteredCount);
+
+  console.log(enrollments);
 
   return (
     <div className="space-y-4">
