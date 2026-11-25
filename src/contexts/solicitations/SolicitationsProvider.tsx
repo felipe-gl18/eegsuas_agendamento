@@ -4,6 +4,7 @@ import { SolicitationsContext } from "./SolicitationsContext";
 
 import type {
   Decision,
+  DocumentUrl,
   PaginationMeta,
   SolicitationDetails,
   SolicitationListItem,
@@ -210,6 +211,16 @@ export function SolicitationsProvider({
     [],
   );
 
+  const getDocumentUrl = useCallback(
+    (solicitationId: string, documentId: string): Promise<DocumentUrl> =>
+      request<DocumentUrl>(
+        `/admin/upload-requests/${encodeURIComponent(
+          solicitationId,
+        )}/documents/${encodeURIComponent(documentId)}/url`,
+      ),
+    [],
+  );
+
   // PATCH /admin/upload-requests/:id/decision
   const decideSolicitation = useCallback(
     async (
@@ -273,7 +284,7 @@ export function SolicitationsProvider({
         fetchSolicitations,
         fetchSolicitationById,
         decideSolicitation,
-
+        getDocumentUrl,
         // Utilities
         setCurrentSolicitation,
         clearError,

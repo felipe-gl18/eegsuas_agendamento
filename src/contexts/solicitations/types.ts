@@ -16,6 +16,13 @@ export interface SolicitationsParams {
   validationStatus?: ValidationStatus;
 }
 
+export interface DocumentUrl {
+  url: string;
+  expiresIn: number;
+  fileName: string;
+  mimeType: string;
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Enums                                                                      */
 /* -------------------------------------------------------------------------- */
@@ -107,6 +114,11 @@ export interface SolicitationsContextData {
     decision: Decision,
     note?: string,
   ) => Promise<SolicitationDetails>;
+
+  getDocumentUrl: (
+    solicitationId: string,
+    documentId: string,
+  ) => Promise<DocumentUrl>;
 
   // Utilitários
   setCurrentSolicitation: (solicitation: SolicitationDetails | null) => void;
