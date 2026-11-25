@@ -5,7 +5,6 @@ export interface AuthUser {
   name: string;
   email: string;
   role: UserRole;
-  university?: string | null;
 }
 
 export interface LoginCredentials {
@@ -18,7 +17,9 @@ export interface RegisterData {
   email: string;
   password: string;
   cpf: string;
-  university?: string | null;
+  unityId: string;
+  occupationId: string;
+  universityId?: string | null;
 }
 
 export interface ForgotPasswordData {
@@ -41,12 +42,28 @@ export interface UpdateProfileData {
   university?: string | null;
 }
 
+export interface Unity {
+  id: string;
+  name: string;
+  acronym: string | null;
+}
+
+export interface Occupation {
+  id: string;
+  name: string;
+}
+
 export interface AuthenticationContextData {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isInitializing: boolean;
   error: string | null;
+
+  unities: Unity[];
+  occupations: Occupation[];
+  isLoadingOptions: boolean;
+  fetchRegistrationOptions: () => Promise<void>;
 
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;

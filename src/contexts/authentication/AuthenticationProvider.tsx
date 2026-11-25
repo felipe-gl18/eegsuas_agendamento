@@ -16,6 +16,8 @@ import type {
   ResetPasswordData,
   ChangePasswordData,
   UpdateProfileData,
+  Unity,
+  Occupation,
 } from "./types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3333";
@@ -68,6 +70,9 @@ export function AuthenticationProvider({
   children,
 }: AuthenticationProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [unities, setUnities] = useState<Unity[]>([]);
+  const [occupations, setOccupations] = useState<Occupation[]>([]);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -129,6 +134,8 @@ export function AuthenticationProvider({
           email: data.email,
           cpf: data.cpf,
           password: data.password,
+          unityId: data.unityId,
+          occupationId: data.occupationId,
         },
       });
     } catch (err) {
@@ -262,6 +269,32 @@ export function AuthenticationProvider({
     }
   }, []);
 
+  // Loads the options for the registration selects (public endpoints).
+  const fetchRegistrationOptions = useCallback(async () => {
+    setIsLoadingOptions(true);
+    setError(null);
+
+    try {
+      const [unitiesData, occupationsData] = await Promise.all([
+        request<Unity[]>("/unities"),
+        request<Occupation[]>("/occupations"),
+      ]);
+
+      setUnities(unitiesData);
+      setOccupations(occupationsData);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Unable to load the registration options.";
+
+      setError(message);
+      throw err;
+    } finally {
+      setIsLoadingOptions(false);
+    }
+  }, []);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -274,10 +307,13 @@ export function AuthenticationProvider({
   const value = useMemo(
     () => ({
       user,
+      unities,
+      occupations,
       isAuthenticated,
       isLoading,
       isInitializing,
       error,
+      isLoadingOptions,
       login,
       register,
       logout,
@@ -286,14 +322,18 @@ export function AuthenticationProvider({
       changePassword,
       updateProfile,
       refreshSession,
+      fetchRegistrationOptions,
       clearError,
     }),
     [
       user,
+      unities,
+      occupations,
       isAuthenticated,
       isLoading,
       isInitializing,
       error,
+      isLoadingOptions,
       login,
       register,
       logout,
@@ -302,6 +342,7 @@ export function AuthenticationProvider({
       changePassword,
       updateProfile,
       refreshSession,
+      fetchRegistrationOptions,
       clearError,
     ],
   );
