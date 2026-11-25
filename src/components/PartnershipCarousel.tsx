@@ -48,6 +48,16 @@ type Step = {
   fields?: FieldName[]; // opcional: etapas sem campos para validar
 };
 
+// Shape of each item the backend returns in `files` (success) and `documents` (error)
+interface DocumentReturn {
+  field: "document1" | "document2" | "document3" | "document4";
+  name: string;
+  file?: string;
+  status: "approved" | "rejected" | "review" | "not_validated" | "missing";
+  reasons: string[];
+  path?: string;
+}
+
 const steps: Step[] = [
   {
     title: "Coerência institucional",
@@ -126,12 +136,19 @@ export default function PartnershipCarousel({
         } = data;
 
         const body = new FormData();
-        body.append("data", JSON.stringify(formData));
 
+        // The backend reads `cpf` from this JSON to compare it with the signing certificate.
+        // In this form the CPF is typed in the `document` field.
+        body.append(
+          "data",
+          JSON.stringify({ ...formData, cpf: formData.document }),
+        );
+
+        // document1..4 must keep this order (same as the backend CONFIG)
         [presentationLetter, commitmentTerm, studentList, workPlan].forEach(
-          (document, index) => {
-            if (document instanceof File) {
-              body.append(`document${index + 1}`, document);
+          (file, index) => {
+            if (file instanceof File) {
+              body.append(`document${index + 1}`, file);
             }
           },
         );
@@ -141,40 +158,43 @@ export default function PartnershipCarousel({
           body,
         });
 
-        // se o servidor devolver algo que não é JSON (ex.: erro 500 em HTML), result fica null
+        // if the server returns something that is not JSON (e.g. a 500 in HTML), result is null
         const result = await response.json().catch(() => null);
 
         if (!response.ok) {
+          const message = Array.isArray(result?.message)
+            ? result.message.join(", ")
+            : result?.message;
+
           showError(
-            result?.message || "Falha ao enviar os documentos.",
+            response.status === 429
+              ? "Too many submissions. Please try again later."
+              : message || "Failed to send the documents.",
             Array.isArray(result?.documents) ? result.documents : [],
           );
           return;
         }
 
-        // documentos que subiram, mas precisam de conferência manual
-        const emRevisao: DocumentReturn[] = (result?.files ?? []).filter(
-          (f: DocumentReturn) => f.status === "revisao",
+        // documents that were uploaded but need manual review
+        const inReview: DocumentReturn[] = (result?.files ?? []).filter(
+          (f: DocumentReturn) => f.status === "review",
         );
-        if (emRevisao.length > 0) {
-          toast.warning(
-            "Documentos enviados, mas serão conferidos manualmente.",
-            {
-              duration: 10000,
-              description: <DocumentsList documents={emRevisao} />,
-            },
-          );
+        if (inReview.length > 0) {
+          toast.warning("Documents sent, but they will be checked manually.", {
+            duration: 10000,
+            description: <DocumentsList documents={inReview} />,
+          });
         }
 
         setSubmittedEmail(data.email);
         setShowSuccess(true);
       } catch (error) {
         console.error("Submission error:", error);
-        // fetch lança TypeError quando o servidor está fora do ar / sem rede
+        // fetch throws TypeError when the server is down / there is no network
         toast.error(
           error instanceof TypeError
-            ? "Não foi possível conectar ao servidor. Tente novamente em instantes."
-            : "Ocorreu um erro inesperado.",
+            ? "Could not connect to the server. Please try again shortly."
+            : "An unexpected error occurred.",
         );
       }
     },
