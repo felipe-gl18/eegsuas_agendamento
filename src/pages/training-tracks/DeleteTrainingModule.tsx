@@ -24,6 +24,7 @@ interface DeleteTrainingModuleProps {
 }
 
 export default function DeleteTrainingModule({
+  formationId,
   module,
 }: DeleteTrainingModuleProps) {
   const [open, setOpen] = useState(false);
@@ -43,7 +44,7 @@ export default function DeleteTrainingModule({
 
   async function handleConfirm() {
     try {
-      await deleteModule(module.id);
+      await deleteModule(formationId, module.id);
       setOpen(false);
     } catch {
       // O contexto já disponibiliza a mensagem de erro.

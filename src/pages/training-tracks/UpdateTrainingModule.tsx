@@ -24,6 +24,7 @@ interface UpdateTrainingModuleProps {
 }
 
 export default function UpdateTrainingModule({
+  formationId,
   module,
 }: UpdateTrainingModuleProps) {
   const [open, setOpen] = useState(false);
@@ -40,7 +41,7 @@ export default function UpdateTrainingModule({
 
   async function handleSubmit(data: TrainingModuleFormData) {
     try {
-      await updateModule(module.id, data);
+      await updateModule(formationId, module.id, data);
       setOpen(false);
     } catch {
       // O contexto já disponibiliza a mensagem de erro.

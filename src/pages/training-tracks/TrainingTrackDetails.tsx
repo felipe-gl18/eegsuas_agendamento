@@ -10,6 +10,7 @@ import { Button } from "../../components/ui/button";
 import { Skeleton } from "../../components/ui/skeleton";
 import UpdateTrainingModule from "./UpdateTrainingModule";
 import DeleteTrainingModule from "./DeleteTrainingModule";
+import EnrolledStudents from "./EnrolledStudents";
 
 export default function TrainingTrackDetails() {
   const { id } = useParams<{ id: string }>();
@@ -208,6 +209,20 @@ export default function TrainingTrackDetails() {
             ))}
           </div>
         )}
+      </section>
+      <section className="space-y-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-[#514949]">Participantes</h2>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              Todos os participantes da formação
+            </p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <EnrolledStudents trackId={id} />
+        </div>
       </section>
     </div>
   );

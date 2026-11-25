@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "../../components/ui/dialog";
 
-import type { ModuleFormData } from "../../schemas/training-module.schema";
+import type { TrainingModuleFormData } from "../../schemas/training-module.schema";
 
 interface AddTrainingModuleProps {
   formationId: string;
@@ -24,7 +24,6 @@ interface AddTrainingModuleProps {
 
 export default function AddTrainingModule({
   formationId,
-  nextOrder = 1,
 }: AddTrainingModuleProps) {
   const [open, setOpen] = useState(false);
 
@@ -38,7 +37,7 @@ export default function AddTrainingModule({
     }
   }
 
-  async function handleSubmit(data: ModuleFormData) {
+  async function handleSubmit(data: TrainingModuleFormData) {
     try {
       await createModule(formationId, data);
       setOpen(false);
@@ -72,7 +71,6 @@ export default function AddTrainingModule({
             defaultValues={{
               name: "",
               description: "",
-              order: nextOrder,
             }}
             isSubmitting={isSubmitting}
             error={error}
