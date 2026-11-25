@@ -8,8 +8,9 @@ import {
   GraduationCap,
   CalendarDays,
   BookOpen,
-  UsersRound,
   AlertCircle,
+  Building2,
+  Briefcase,
 } from "lucide-react";
 
 import { useUsers } from "../../contexts/users/useUsers";
@@ -265,6 +266,40 @@ export default function UserDetails() {
                     Não vinculada
                   </p>
                 )}
+              </div>
+            </div>
+
+            {/* Unity */}
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-[#514949]/10 p-2">
+                <Building2 className="size-4 text-[#514949]" />
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Unidade</p>
+
+                <p className="mt-1 font-medium text-[#514949]">
+                  {user.unity.name}
+                </p>
+
+                <p className="text-xs text-muted-foreground">
+                  {user.unity.acronym}
+                </p>
+              </div>
+            </div>
+
+            {/* Occupation */}
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-[#514949]/10 p-2">
+                <Briefcase className="size-4 text-[#514949]" />
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Ocupação</p>
+
+                <p className="mt-1 font-medium text-[#514949]">
+                  {user.occupation.name}
+                </p>
               </div>
             </div>
 

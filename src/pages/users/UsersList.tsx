@@ -8,6 +8,8 @@ import {
   UserRound,
   BriefcaseBusiness,
   Trash2,
+  Building2,
+  Briefcase,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -254,13 +256,35 @@ export default function UsersList() {
                     <span className="truncate">{user.email}</span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex min-w-0 items-center gap-2">
                     <GraduationCap className="size-4 shrink-0" />
 
                     <span className="truncate">
                       {user.university
                         ? `${user.university.acronym} - ${user.university.name}`
                         : "Sem universidade vinculada"}
+                    </span>
+                  </div>
+
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Building2 className="size-4 shrink-0" />
+
+                    <span className="truncate">
+                      {user.unity
+                        ? user.unity.acronym
+                          ? `${user.unity.acronym} - ${user.unity.name}`
+                          : user.unity.name
+                        : "Sem unidade vinculada"}
+                    </span>
+                  </div>
+
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Briefcase className="size-4 shrink-0" />
+
+                    <span className="truncate">
+                      {user.occupation
+                        ? user.occupation.name
+                        : "Sem cargo vinculado"}
                     </span>
                   </div>
                 </div>
